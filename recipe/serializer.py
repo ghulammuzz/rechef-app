@@ -13,7 +13,7 @@ class PopularRecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = "__all__"
         
-class RecipeModelSerializer(serializers.Serializer):
+class RecipeModelSerializer(serializers.ModelSerializer):
     
     id = serializers.UUIDField(read_only=True)
     name = serializers.CharField(required=True)
@@ -31,4 +31,4 @@ class RecipeModelSerializer(serializers.Serializer):
     
     class Meta:
         model = Recipe
-        fields = ["id", "name", "description", "image", "user", "view", "fav"]
+        fields = ["id", "name", "description", "image", "view", "fav"]
