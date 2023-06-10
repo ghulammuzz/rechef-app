@@ -38,9 +38,11 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
     "NON_FIELD_ERRORS_KEY": "errors",
-    # 'DEFAULT_RENDERER_CLASSES': [
-        # 'rest_framework.renderers.JSONRenderer',
-    # ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'pagination.pagination.ApiPagination',
+
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
     ],

@@ -3,6 +3,7 @@ from rest_framework import generics, mixins
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .serializer import *
+from .tokens import create_token
 
 # Test View
 class TestView(APIView):
