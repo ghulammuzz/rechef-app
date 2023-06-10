@@ -13,12 +13,21 @@ class PopularRecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = "__all__"
         
-class RecipeModelSerializer(serializers.ModelSerializer):
+class RecipeModelSerializer(serializers.Serializer):
     
     id = serializers.UUIDField(read_only=True)
     name = serializers.CharField(required=True)
     description = serializers.CharField(required=True)
-    image = serializers.ImageField(required=True)
+    image = serializers.ImageField(required=True, )
+
+    def to_representation(self, instance):
+        return super().to_representation(instance)    
+    
+    def create(self, validated_data):
+        return Recipe.objects.create(
+            user = self.context['request'].user,
+            **validated_data
+        )
     
     class Meta:
         model = Recipe
