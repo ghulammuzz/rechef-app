@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     'rest_framework_simplejwt',
+    'django_filters',
     'rest_framework',
     'corsheaders',
     
