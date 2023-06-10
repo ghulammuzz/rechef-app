@@ -6,8 +6,8 @@ User = get_user_model()
 def create_token(user):
     refresh = RefreshToken.for_user(user)
     tokens = {
-        "id": str(user.id),
-        "email": user.email,
+        # "id": str(user.id),
+        # "email": user.email,
         "access": str(refresh.access_token),
         "refresh": str(refresh)
     }
