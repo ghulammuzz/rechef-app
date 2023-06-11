@@ -22,7 +22,7 @@ class RecipeModelSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         return super().to_representation(instance)    
-    
+
     def create(self, validated_data):
         return Recipe.objects.create(
             user = self.context['request'].user,
