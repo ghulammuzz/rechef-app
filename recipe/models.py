@@ -32,6 +32,8 @@ class Recipe(models.Model):
     
 class Method(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    number = models.IntegerField(default=0)
+    recipe_fk = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='method_fk')
     method_text = models.TextField()
     
     def __str__(self):
@@ -39,7 +41,25 @@ class Method(models.Model):
     
 class Ingredient(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    number = models.IntegerField(default=0)
+    recipe_fk = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='ingredient_fk')
+
+    # unit
+    class Unit(models.TextChoices):
+        Q = 'Q'
+        Gram = 'Gram'
+        Liter = 'Liter'
+        Sendok = 'Sendok'
+        Buah = 'Buah'
+        Sachet = 'Sachet'
+        
+    unit = models.CharField(max_length=10, choices=Unit.choices, default=Unit.Q)
+    
+    # quantity
+    quantity = models.IntegerField(default=0)
+    
     ingredient_text = models.TextField()
     
     def __str__(self):
         return self.ingredient_text
+    
