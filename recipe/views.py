@@ -11,7 +11,6 @@ from .serializer import *
 
 class DashboardView(generics.ListAPIView):
     permission_classes = (isUserLogin,)
-    # serializer_class = PopularRecipeSerializer
     
 class RecipeViewset(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
@@ -25,3 +24,4 @@ class RecipeViewset(viewsets.ModelViewSet):
         if recipe.user != request.user:
             return Response({"message": "You are not allowed to update this recipe."}, status=401)
         return super().update(request, *args, **kwargs)
+    
