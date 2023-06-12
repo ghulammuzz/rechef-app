@@ -18,6 +18,7 @@ class RecipeViewset(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         recipe = self.get_object()
+        self.parser_classes = (MultiPartParser, FormParser)
         if recipe.user != request.user:
             return Response({"message": "You are not allowed to update this recipe."}, status=401)
         return super().update(request, *args, **kwargs)
