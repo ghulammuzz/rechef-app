@@ -43,10 +43,11 @@ class User(AbstractUser):
     bio = models.TextField(blank=True, null=True)
     
     class Gender(models.TextChoices): 
+        Unknown = 'Unknown', ('Unknown')
         Men = 'Men', ('Men')
         Women = 'Women', ('Women')
     
-    gender = models.CharField(choices=Gender.choices, max_length=10)
+    gender = models.CharField(choices=Gender.choices, max_length=10, default=Gender.Unknown)
     interest = models.ManyToManyField('Interest')
        
     is_admin = models.BooleanField(default=False)
