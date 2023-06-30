@@ -28,11 +28,11 @@ class RegisterUserSerializer(serializers.ModelSerializer):
     def validate(self, data):
         
         interest = data.pop('interest')
-        gender = data['gender']
+        # gender = data['gender']
         
-        if gender != ("Men" and "Women" and "Unknown"):
-            print(gender)
-            raise serializers.ValidationError({"message" : "Gender must match"})  
+        # if gender != ("Men" and "Women" and "Unknown"):
+        #     print(gender)
+        #     raise serializers.ValidationError({"message" : "Gender must match"})  
         if interest:
             list_interest = []
             for i in interest:

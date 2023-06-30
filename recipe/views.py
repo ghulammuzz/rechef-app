@@ -6,13 +6,18 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from .models import *
 from .serializer import *
 
-class DashboardView(generics.ListAPIView):
-    permission_classes = (isUserLogin,)
+class DashboardView(generics.GenericAPIView):
+    permission_classes = (isUserLogin)
     
+    def get(self, request):
+        user = request.user
+        
+        
+
 class RecipeViewset(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeModelSerializer
-    permission_classes = (isUserLogin,)
+    permission_classes = ()
     # parser_classes = (MultiPartParser, FormParser)
     filter_backends = [DjangoFilterBackend]
 
@@ -22,4 +27,12 @@ class RecipeViewset(viewsets.ModelViewSet):
         if recipe.user != request.user:
             return Response({"message": "You are not allowed to update this recipe."}, status=401)
         return super().update(request, *args, **kwargs)
-    
+
+    def retrieve(self, request, *args, **kwargs):
+        # increament view in recipe 
+        # if owner view, not increament
+        recipe = self.get_object()
+        if recipe.user != request.user:
+            recipe.view += 1
+            recipe.save()
+        return super().retrieve(request, *args, **kwargs)
