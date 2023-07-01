@@ -38,6 +38,7 @@ class RecipeModelSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['method'] = instance.method_fk.all().order_by('number').values()
+        data['user'] = instance.user.username
         data['ingredient'] = instance.ingredient_fk.all().order_by('number').values()
         return data
 
@@ -94,3 +95,4 @@ class RecipeModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ["id", "name", "description", "image", "view", "fav", "duration", "portion", "calories", "difficulty", "method", "ingredient"]
+    

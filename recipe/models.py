@@ -26,6 +26,10 @@ class Recipe(models.Model):
     # scalability issue
     view = models.IntegerField(default=0)
     fav = models.IntegerField(default=0)
+    guest = models.ManyToManyField('account.User', related_name='guest', blank=True)
+    
+    # timestamp
+    updated_at = models.DateTimeField(null=True, blank=True)
     
     def __str__(self):
         return self.name
