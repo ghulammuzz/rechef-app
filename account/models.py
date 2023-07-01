@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from recipe.models import Recipe
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, gender, password=None):
@@ -43,12 +44,16 @@ class User(AbstractUser):
     bio = models.TextField(blank=True, null=True)
     
     class Gender(models.TextChoices): 
+        Unknown = 'Unknown', ('Unknown')
         Men = 'Men', ('Men')
         Women = 'Women', ('Women')
     
-    gender = models.CharField(choices=Gender.choices, max_length=10)
+    gender = models.CharField(choices=Gender.choices, max_length=10, default=Gender.Unknown)
+    
     interest = models.ManyToManyField('Interest')
-       
+    favorite = models.ManyToManyField(Recipe, related_name='favorite', blank=True)
+    last_view = models.ManyToManyField(Recipe, related_name='last_view', blank=True)
+    
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
