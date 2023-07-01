@@ -9,6 +9,6 @@ router.register(r'recipe', RecipeViewset, basename='recipe')
 
 urlpatterns = [
     path(r'', include(router.urls)),
-    path('favorite/', FavoriteView.as_view(), name='favorite'),
+    path('favorite/', FavoriteView.as_view(), name='favorite-recipe'),
     path('dashboard/', DashboardView.as_view(), name='dashboard')
 ]
