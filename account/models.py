@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from recipe.models import Recipe
 
 class UserManager(BaseUserManager):
-    def create_user(self, username, email, gender, password=None):
+    def create_user(self, username, email, gender=None, password=None,):
         if not email:
             raise ValueError("Users must have an email address")
         
@@ -16,7 +16,11 @@ class UserManager(BaseUserManager):
                 email = self.normalize_email(email),
                 gender = gender
             )
-        
+        elif gender is None:
+            user = self.model(
+                username = username,
+                email = self.normalize_email(email),
+            )
         user.set_password(password)
         user.save(using=self._db)
         
@@ -57,10 +61,10 @@ class User(AbstractUser):
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-    
+
     objects = UserManager()
     
     def __str__(self):
