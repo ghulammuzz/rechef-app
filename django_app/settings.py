@@ -95,23 +95,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'django_app.wsgi.application'
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'recheffapp',
-        'USER': 'recheffapp',
-        'PASSWORD': 'recheffapp',
-        'HOST': '127.0.0.1',  # Typically 'localhost' or '127.0.0.1' for local development
-        'PORT': '3306',  # Typically '5432' for PostgreSQL
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'recheffapp',
+#         'USER': 'recheffapp',
+#         'PASSWORD': 'recheffapp',
+#         'HOST': '127.0.0.1',  # Typically 'localhost' or '127.0.0.1' for local development
+#         'PORT': '3306',  # Typically '5432' for PostgreSQL
+#     }
+# }
 
 
 AUTH_PASSWORD_VALIDATORS = [
