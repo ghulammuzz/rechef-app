@@ -1,6 +1,13 @@
 from django.db import models
 import uuid
 
+
+# -
+# Recipe Tag
+# Comment
+# Hidden Like
+# Hidden Comment
+
 class Recipe(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=50)
@@ -23,6 +30,9 @@ class Recipe(models.Model):
     method = models.ManyToManyField('Method')
     ingredient = models.ManyToManyField('Ingredient')
     
+    # category
+    category = models.ManyToManyField('Category')
+    
     # scalability issue
     view = models.IntegerField(default=0)
     fav = models.IntegerField(default=0)
@@ -43,12 +53,15 @@ class Category(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=50)
     
+    # freak
+    core = models.ManyToManyField('Core', related_name='category_core', blank=True)
+    
     def __str__(self):
         return self.name
     
 class Core(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    category_fk = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='core_fk')
+    category_fk = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='core_fk', blank=True, null=True)
     name = models.CharField(max_length=50)
 
     def __str__(self):
@@ -68,7 +81,8 @@ class Ingredient(models.Model):
     ingredient_text = models.TextField()
     number = models.IntegerField(default=0)
     recipe_fk = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='ingredient_fk')
-    core = models.ForeignKey(Core, on_delete=models.CASCADE, related_name='ingredient_core')
+    core = models.ForeignKey(Core, on_delete=models.CASCADE, related_name='ingredient_core', blank=True, null=True)
+    note = models.CharField(max_length=100, blank=True, null=True)
     # unit
     class Unit(models.TextChoices):
         Q = 'Q'

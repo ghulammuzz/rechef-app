@@ -39,6 +39,9 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         
         return user
+    
+    
+# is activate store
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(max_length=255, blank=True, null=True)

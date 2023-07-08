@@ -1,5 +1,5 @@
 {
-    "name" : "Mamamu Kupake",
+    "name" : "Bapakmu Ayahku",
     "description" : "deskripsi resep 1",
     "portion" : 19,
     "duration" : 950,
@@ -8,59 +8,67 @@
     "difficulty" : "Pemula",
     "category" : [
         {
-            "name" : "Daging - Dagingan",
-            "ingredients" : [
+            "name" : "Daging dan Seafood",
+            "core" : [
                 {
-                    "number" : 1,
-                    "ingredient_text" : "Daging Sapi" ,
-                    "note" : "Daging Sapi yang sudah di bersihkan",
-                    "quantity" : 1000,
-                    "unit" : "Gram"
+                    "name" : "Daging Babskuy",
+                    "ingredient" : {
+                        "number" : 1,
+                        "ingredient_text" : "Daging Babskuy",
+                        "note" : "Daging Sapi yang sudah di bersihkan",
+                        "quantity" : 100,
+                        "unit" : "Gram"
+                    }
                 },
                 {
-                    "number" : 2,
-                    "ingredient_text" : "Daging Lumba Lumba" ,
-                    "note" : "Daging Lumba- Lumba yang sudah di bersihkan",
-                    "quantity" : 200,
-                    "unit" : "Gram"
+                    "name" : "Daging Lumba Lumba",
+                    "ingredient" : {
+                        "number" : 2,
+                        "ingredient_text" : "Daging Lumba Lumba",
+                        "note" : "Daging Lumba Lumba yang sudah di bersihkan",
+                        "quantity" : 100,
+                        "unit" : "Gram"
+                    }
                 }
             ]
         },
         {
-            "name" : "Sayuran",
-            "ingredients" : [
+            "name" : "Gula dan Pemanis",
+            "core" : [
                 {
-                    "number" : 1,
-                    "ingredient_text" : "Kangkung" ,
-                    "note" : "Kangkung yang sudah di bersihkan",
-                    "quantity" : 100,
-                    "unit" : "Gram"
-                },
-                {
-                    "number" : 2,
-                    "ingredient_text" : "Bayam" ,
-                    "note" : "Bayam yang sudah di bersihkan",
-                    "quantity" : 200,
-                    "unit" : "Gram"
+                    "name" : "Gula",
+                    "ingredient" : {
+                        "number" : 1,
+                        "ingredient_text" : "Gula",
+                        "note" : "Gula yang sudah di bersihkan",
+                        "quantity" : 10,
+                        "unit" : "Sendok"
+                    }
                 }
             ]
         },
         {
-            "name" : "Bumbu",
-            "ingredients" : [
+            "name" : "Rempah-Rempah",
+            "core" : [
                 {
-                    "number" : 1,
-                    "ingredient_text" : "Garam" ,
-                    "note" : "Garam yang sudah di bersihkan",
-                    "quantity" : 10,
-                    "unit" : "Sendok"
+                    "name" : "Garam",
+                    "ingredient" : {
+                        "number" : 1,
+                        "ingredient_text" : "Garam",
+                        "note" : "Garam yang sudah di bersihkan",
+                        "quantity" : 10,
+                        "unit" : "Sendok"
+                    }
                 },
                 {
-                    "number" : 2,
-                    "ingredient_text" : "Gula" ,
-                    "note" : "Gula yang sudah di bersihkan",
-                    "quantity" : 2,
-                    "unit" : "Sendok"
+                    "name" : "Merica",
+                    "ingredient" : {
+                        "number" : 2,
+                        "ingredient_text" : "Merica",
+                        "note" : "Merica yang sudah di bersihkan",
+                        "quantity" : 10,
+                        "unit" : "Sendok"
+                    }
                 }
             ]
         }
