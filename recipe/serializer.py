@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Recipe, Method, Ingredient
+from django.shortcuts import get_object_or_404
+from .models import *
 
 class MethodModelSerializer(serializers.ModelSerializer):
     
@@ -9,7 +10,14 @@ class MethodModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Method
         fields = ["id", "number", "method_text"]
-        
+
+class CategoryModelSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only = True)
+    
+    class Meta:
+        model = Category
+        fields = ["id", "name"]
+
 class IngredientModelSerializer(serializers.ModelSerializer):
     
     id = serializers.UUIDField(read_only=True)
@@ -27,18 +35,18 @@ class RecipeModelSerializer(serializers.ModelSerializer):
     description = serializers.CharField(required=True)
     # test
     image = serializers.ImageField(required=False)
-    
+    user = serializers.CharField(source = "user.username", read_only=True)
     duration = serializers.IntegerField(required=True)
     portion = serializers.IntegerField(required=True)
     calories = serializers.IntegerField(required=True)
     difficulty = serializers.ChoiceField(choices=Recipe.Difficulty.choices, required=True)
     method = MethodModelSerializer(many=True)
-    ingredient = IngredientModelSerializer(many=True)
+    category = CategoryModelSerializer(many=True)
+    # ingredient = IngredientModelSerializer(many=True)
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['method'] = instance.method_fk.all().order_by('number').values()
-        data['user'] = instance.user.username
         data['ingredient'] = instance.ingredient_fk.all().order_by('number').values()
         return data
 
@@ -50,49 +58,55 @@ class RecipeModelSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         
-        ingredients = validated_data.pop('ingredient', [])
+        categories = validated_data.pop('category', [])
         methods = validated_data.pop('method', [])
             
         creator = Recipe.objects.create(
             user = self.context['request'].user,
             **validated_data
         )
-        for ingredient in ingredients:
-            sub_ingredient = Ingredient.objects.create(recipe_fk=creator, **ingredient)
-            creator.ingredient.add(sub_ingredient)
-        
+        for category in categories:
+            name_category = category.pop('name')
+            ingredients = categories.pop('ingredients', [])
+            get_category = get_object_or_404(Category, name=name_category)
+            for ingredient in ingredients:
+                sub_ingredient = Ingredient.objects.create(recipe_fk=creator, **ingredient)
+                core, created = Core.objects.get_or_create(category_fk=get_category, name=sub_ingredient.ingredient_text)
+                creator.ingredient.add(sub_ingredient)
+                
+                
         for method in methods:
             sub_method = Method.objects.create(recipe_fk=creator, **method)
             creator.method.add(sub_method)
             
         return creator
     
-    def update(self, instance, validated_data):
-        indgredients = validated_data.pop('ingredient', [])
-        methods = validated_data.pop('method', [])
+    # def update(self, instance, validated_data):
+    #     indgredients = validated_data.pop('ingredient', [])
+    #     methods = validated_data.pop('method', [])
         
-        instance.name = validated_data.get('name', instance.name)
-        instance.description = validated_data.get('description', instance.description)
-        instance.image = validated_data.get('image', instance.image)
-        instance.duration = validated_data.get('duration', instance.duration)
-        instance.portion = validated_data.get('portion', instance.portion)
-        instance.calories = validated_data.get('calories', instance.calories)
-        instance.difficulty = validated_data.get('difficulty', instance.difficulty)
-        instance.save()
+    #     instance.name = validated_data.get('name', instance.name)
+    #     instance.description = validated_data.get('description', instance.description)
+    #     instance.image = validated_data.get('image', instance.image)
+    #     instance.duration = validated_data.get('duration', instance.duration)
+    #     instance.portion = validated_data.get('portion', instance.portion)
+    #     instance.calories = validated_data.get('calories', instance.calories)
+    #     instance.difficulty = validated_data.get('difficulty', instance.difficulty)
+    #     instance.save()
         
-        instance.ingredient_fk.all().delete()
-        for indgredient in indgredients:
-            sub_indgredient = Ingredient.objects.create(recipe_fk=instance, **indgredient)
-            instance.ingredient.add(sub_indgredient)
+    #     instance.ingredient_fk.all().delete()
+    #     for indgredient in indgredients:
+    #         sub_indgredient = Ingredient.objects.create(recipe_fk=instance, **indgredient)
+    #         instance.ingredient.add(sub_indgredient)
             
-        instance.method_fk.all().delete()
-        for method in methods:
-            sub_method = Method.objects.create(recipe_fk=instance, **method)
-            instance.method.add(sub_method)
+    #     instance.method_fk.all().delete()
+    #     for method in methods:
+    #         sub_method = Method.objects.create(recipe_fk=instance, **method)
+    #         instance.method.add(sub_method)
             
-        return super().update(instance, validated_data)
+    #     return super().update(instance, validated_data)
             
     class Meta:
         model = Recipe
-        fields = ["id", "name", "description", "image", "view", "fav", "duration", "portion", "calories", "difficulty", "method", "ingredient"]
+        fields = ["id", "name", "user", "description", "image", "view", "fav", "duration", "portion", "calories", "difficulty", "method", "category"]
     

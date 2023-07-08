@@ -24,3 +24,13 @@ class IngredientAdmin(admin.ModelAdmin):
     list_per_page = 25
     
 admin.site.register(Ingredient,  IngredientAdmin)
+
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')
+    
+admin.site.register(Category,  CategoryAdmin)
+
+class CoreAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'category_fk')
+    
+admin.site.register(Core,  CoreAdmin)

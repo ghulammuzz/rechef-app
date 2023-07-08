@@ -31,9 +31,29 @@ class Recipe(models.Model):
     # timestamp
     updated_at = models.DateTimeField(null=True, blank=True)
     
+    # status
+    class Status(models.TextChoices):
+        Active = 'Active'
+        Inactive = 'Inactive'
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.Active)
+    def __str__(self):
+        return self.name
+
+class Category(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=50)
+    
     def __str__(self):
         return self.name
     
+class Core(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    category_fk = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='core_fk')
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
 class Method(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     number = models.IntegerField(default=0)
@@ -45,9 +65,10 @@ class Method(models.Model):
     
 class Ingredient(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    ingredient_text = models.TextField()
     number = models.IntegerField(default=0)
     recipe_fk = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='ingredient_fk')
-
+    core = models.ForeignKey(Core, on_delete=models.CASCADE, related_name='ingredient_core')
     # unit
     class Unit(models.TextChoices):
         Q = 'Q'
@@ -61,8 +82,6 @@ class Ingredient(models.Model):
     
     # quantity
     quantity = models.IntegerField(default=0)
-    
-    ingredient_text = models.TextField()
     
     def __str__(self):
         return self.ingredient_text

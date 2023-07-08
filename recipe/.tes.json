@@ -6,10 +6,10 @@
     "calories" : 6436,
     "status" : "active",
     "difficulty" : "Pemula",
-    "categories" : [
+    "category" : [
         {
             "name" : "Daging - Dagingan",
-            "Ingredients" : [
+            "ingredients" : [
                 {
                     "number" : 1,
                     "ingredient_text" : "Daging Sapi" ,
@@ -28,7 +28,7 @@
         },
         {
             "name" : "Sayuran",
-            "Ingredients" : [
+            "ingredients" : [
                 {
                     "number" : 1,
                     "ingredient_text" : "Kangkung" ,
@@ -47,7 +47,7 @@
         },
         {
             "name" : "Bumbu",
-            "Ingredients" : [
+            "ingredients" : [
                 {
                     "number" : 1,
                     "ingredient_text" : "Garam" ,
