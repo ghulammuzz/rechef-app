@@ -15,6 +15,10 @@ class Recipe(models.Model):
     image = models.ImageField(upload_to='recipe-images/')
     user = models.ForeignKey('account.User', on_delete=models.CASCADE)
     
+    # comment
+    is_hidden_like = models.BooleanField(default=False)
+    is_hidden_comment = models.BooleanField(default=False)
+    
     # aditional field
     duration = models.IntegerField(default=0)
     portion = models.IntegerField(default=0)
@@ -40,7 +44,7 @@ class Recipe(models.Model):
     
     # timestamp
     updated_at = models.DateTimeField(null=True, blank=True)
-    
+    created_at = models.DateTimeField(null=True, blank=True)
     # status
     class Status(models.TextChoices):
         Active = 'Active'

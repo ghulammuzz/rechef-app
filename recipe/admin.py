@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import *
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'description', 'image', 'user', 'view', 'fav')
+    list_display = ('id', 'name', 'description', 'image', 'user', 'view', 'fav', 'created_at')
     list_editable = ('view', 'user', 'fav')
     list_display_links = ('id', 'name')
     search_fields = ('name', 'description')

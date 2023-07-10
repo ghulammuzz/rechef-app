@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 from django.shortcuts import get_object_or_404
 from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
@@ -11,7 +12,7 @@ from django.utils import timezone
 from permission.permission import isUserLogin
 from .models import *
 from .serializer import *
-
+from pagination.pagination import ApiPagination
 class DashboardView(generics.GenericAPIView):
     permission_classes = ()
     
@@ -21,6 +22,7 @@ class DashboardView(generics.GenericAPIView):
         point = (view * 0.5) + (fav * 1)
         return point
     
+    
     def get(self, request):
         recipe = Recipe.objects.all()
         sorted_recipe = sorted(recipe, key=self.get_point_populer, reverse=True)
@@ -28,8 +30,14 @@ class DashboardView(generics.GenericAPIView):
         for i in range (len(sorted_recipe)):
             print(sorted_recipe[i].name, self.get_point_populer(sorted_recipe[i]))
         
-        serializer = RecipeModelSerializer(sorted_recipe[:5], many=True)
-        return Response(serializer.data)
+        popular = RecipeModelForListSerializer(sorted_recipe[:5], many=True)
+        last_seen_data = request.user.last_view.all()
+        reverse_last_seen_data = last_seen_data[::-1]
+        last_seen = RecipeModelForListSerializer(reverse_last_seen_data[:5]  , many=True)
+        return Response({
+            "popular": popular.data,
+            "last_seen": last_seen.data
+        })
         
 @method_decorator(ratelimit(key='ip', rate='1/s', block=True), name='dispatch')
 class RecipeViewset(viewsets.ModelViewSet):
@@ -37,8 +45,39 @@ class RecipeViewset(viewsets.ModelViewSet):
     serializer_class = RecipeModelSerializer
     permission_classes = ()
     # parser_classes = (MultiPartParser, FormParser)
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = [
+        'user__username',
+        'name',
+        'category__name',
+        'ingredient__ingredient_text',
+        ]
+    ordering_fields = ['user__username']
 
+    pagination_class = ApiPagination
+
+    def list(self, request, *args, **kwargs):
+        self.pagination_class = ApiPagination
+        self.serializer_class = RecipeModelForListSerializer
+        # query_param for FEED
+        type = request.query_params.get('type')
+        page = self.paginate_queryset(self.queryset)
+        if type == "all":
+            print("all")
+            page = self.paginate_queryset(self.queryset)
+        elif type == "professional":
+            page = self.paginate_queryset(self.queryset.filter(difficulty="Pro"))
+        elif type == "newbie":
+            page = self.paginate_queryset(self.queryset.filter(difficulty="Pemula"))
+        elif type == 'new':
+            print("new")
+            page = self.paginate_queryset(self.queryset.order_by('-created_at'))
+
+        serializer = RecipeModelForListSerializer(page, many=True)
+        # return self.get_paginated_response(serializer.data)   
+        return super().list(request, *args, **kwargs) 
+         
+    
     def update(self, request, *args, **kwargs):
         recipe = self.get_object()
         self.parser_classes = (MultiPartParser, FormParser)
@@ -58,23 +97,19 @@ class RecipeViewset(viewsets.ModelViewSet):
                 request.user.last_view.add(recipe)
             if recipe.guest.filter(id=request.user.id).exists():
                 recipe.view += 0
+                request.user.last_view.add(recipe)
             else:
                 recipe.view += 1
                 recipe.guest.add(request.user)
+                request.user.last_view.add(recipe)
                 # recipe.updated_at = timezone.now()
                 # max 5 in last view
-                
-            recipe.save()
         
-        # if recipe.user != request.user:
-        #     recipe.view += 1
-        #     # recipe.updated_at = timezone.now()
-        #     # max 5 in last view
-        #     len_viewed = len(request.user.viewed.all())
-        #     if len_viewed == 5 or len_viewed > 5:
-        #         request.user.viewed.remove(request.user.viewed.all()[0])
-        #     request.user.viewed.add(recipe)
-        #     recipe.save()
+            recipe.save()
+        elif request.user == recipe.user:
+            request.user.last_view.add(recipe)
+        
+
         return super().retrieve(request, *args, **kwargs)
     
 

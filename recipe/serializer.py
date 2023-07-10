@@ -33,6 +33,7 @@ class CoreIngredientModelSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=True)
     ingredient = IngredientCoreModelSerializer(many=False)
     
+    
     def create(self, validated_data):
         core = Core.objects.create(**validated_data)
         return core
@@ -40,14 +41,40 @@ class CoreIngredientModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Core
         fields = ["id", "name", 'ingredient']
+class IngredientCoreModelForGetSerializer(serializers.ModelSerializer):
+    recipe_fk = serializers.CharField(source = "recipe_fk.name", read_only=True)
+    class Meta:
+        model = Ingredient
+        fields = ["id", "ingredient_text","recipe_fk", "quantity", "unit", "number", "note"]
+
+class CoreIngredientModelForGetSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
+    name = serializers.CharField(required=True)
+    ingredient = serializers.SerializerMethodField()
+    
+    def get_ingredient(self, obj):
+        ingredient = Ingredient.objects.filter(core=obj)
+        return IngredientCoreModelForGetSerializer(ingredient, many=True).data
+    
+    class Meta:
+        model = Core
+        fields = ["id", "name", "ingredient"]
 
 class CategoryModelSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only = True)
+    name = serializers.CharField(required=True)
     core = CoreIngredientModelSerializer(many=True)
-
+    datas = serializers.SerializerMethodField()
+    
+    def get_datas(self, obj):
+        
+        # recipe category data
+        core = Core.objects.filter(category_fk=obj)
+        return CoreIngredientModelForGetSerializer(core, many=True).data
+    
     class Meta:
         model = Category
-        fields = ["id", "name", "core"]
+        fields = ["id", "name", "core", "datas"]
 
 
 class RecipeModelSerializer(serializers.ModelSerializer):
@@ -65,10 +92,35 @@ class RecipeModelSerializer(serializers.ModelSerializer):
     method = MethodModelSerializer(many=True)
     category = CategoryModelSerializer(many=True)
 
-    def get_method(self, obj):
-        method = Method.objects.filter(recipe_fk=obj)
-        sorted_method = method.order_by('number')
-        return MethodModelSerializer(sorted_method, many=True).data
+    
+    # def get_method(self, obj):
+    #     method = Method.objects.filter(recipe_fk=obj)
+    #     sorted_method = method.order_by('number')
+    #     return MethodModelSerializer(sorted_method, many=True).data
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        # Convert the duration to hours and minutes
+        duration = representation['duration']
+        hours = duration // 60
+        minutes = duration % 60
+        representation['duration'] = f"{hours} Jam {minutes} menit"
+        
+        # method order by number
+        method = representation['method']
+        sorted_method = sorted(method, key=lambda k: k['number'])
+        representation['method'] = sorted_method
+        
+        # show core ingredient in category
+        category = representation['category']
+        for core in category:
+            core_ingredient = core['core']
+            sorted_core = sorted(core_ingredient, key=lambda
+                                    k: k['number'])
+            core['core'] = sorted_core
+            
+        return representation
     
     def create(self, validated_data):
         
@@ -117,6 +169,8 @@ class RecipeModelSerializer(serializers.ModelSerializer):
         instance.portion = validated_data.get('portion', instance.portion)
         instance.calories = validated_data.get('calories', instance.calories)
         instance.difficulty = validated_data.get('difficulty', instance.difficulty)
+        instance.is_hidden_like = validated_data.get('is_hidden_like', instance.is_hidden_like)
+        instance.is_hidden_comment = validated_data.get('is_hidden_comment', instance.is_hidden_comment)
         instance.save()
         
         for category in categories:
@@ -155,19 +209,28 @@ class RecipeModelSerializer(serializers.ModelSerializer):
         for method in methods:
             sub_method = Method.objects.create(recipe_fk=instance, **method)
             instance.method.add(sub_method)
-    #     instance.ingredient_fk.all().delete()
-    #     for indgredient in indgredients:
-    #         sub_indgredient = Ingredient.objects.create(recipe_fk=instance, **indgredient)
-    #         instance.ingredient.add(sub_indgredient)
-            
-    #     instance.method_fk.all().delete()
-    #     for method in methods:
-    #         sub_method = Method.objects.create(recipe_fk=instance, **method)
-    #         instance.method.add(sub_method)
             
         return super().update(instance, validated_data)
             
     class Meta:
         model = Recipe
-        fields = ["id", "name", "user", "description", "image", "view", "fav", "duration", "portion", "calories", "difficulty", "method", "category"]
+        fields = ["id", "name", "user", "description", "image", "view", "fav", "duration", "portion", "calories", "difficulty", "is_hidden_like", "is_hidden_comment", "method", "category"]
+    
+class RecipeModelForListSerializer(serializers.ModelSerializer):
+    
+    id = serializers.UUIDField(read_only=True)
+    name = serializers.CharField(required=True)
+    description = serializers.CharField(required=True)
+    # test
+    image = serializers.ImageField(required=False)
+    user = serializers.CharField(source = "user.username", read_only=True)
+    duration = serializers.IntegerField(required=True)
+    portion = serializers.IntegerField(required=True)
+    calories = serializers.IntegerField(required=True)
+    difficulty = serializers.ChoiceField(choices=Recipe.Difficulty.choices, required=True)
+
+            
+    class Meta:
+        model = Recipe
+        fields = ["id", "name", "user", "description", "image", "view", "fav", "duration", "portion", "calories", "difficulty", "is_hidden_like", "is_hidden_comment"]
     
