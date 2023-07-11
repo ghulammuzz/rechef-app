@@ -8,8 +8,8 @@ from rest_framework import generics, viewsets
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from django.utils import timezone
-from permission.permission import isUserLogin
+from account.serializer import InterestSerializer
+from account.models import Interest
 from .models import *
 from .serializer import *
 from pagination.pagination import ApiPagination
@@ -139,3 +139,21 @@ class FavoriteView(generics.ListAPIView, generics.CreateAPIView):
             user.favorite.add(recipe)
             recipe.save()
             return Response({"message": "added"}, status=200)
+
+class PaginationForRecipeCategoryView(ApiPagination):
+    page_size = 13
+    page_size_query_param = 'page_size'
+    max_page_size = 1000
+
+class RecipeCategoryView(generics.ListAPIView):
+    permission_classes = ()
+    queryset = Interest.objects.all()
+    serializer_class = InterestSerializer
+    pagination_class = PaginationForRecipeCategoryView
+    
+class IngredientCategoryView(generics.ListAPIView):
+    permission_classes = ()
+    queryset = Category.objects.all()
+    serializer_class = CategoryForListSerializer
+    
+    

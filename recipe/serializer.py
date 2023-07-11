@@ -60,6 +60,15 @@ class CoreIngredientModelForGetSerializer(serializers.ModelSerializer):
         model = Core
         fields = ["id", "name", "ingredient"]
 
+class CategoryForListSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only = True)
+    name = serializers.CharField(required=True)
+    core = CoreIngredientModelSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Category
+        fields = ["id", "name", "core"]
+
 class CategoryModelSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only = True)
     name = serializers.CharField(required=True)

@@ -11,5 +11,7 @@ urlpatterns = [
     path(r'', include(router.urls)),
     path('favorite/', FavoriteView.as_view(), name='favorite-recipe'),
     path('dashboard/', DashboardView.as_view(), name='dashboard-viewww'),
-    # path('recipe/', RecipeViewset.as_view(), name='recipe-detail'),
+    
+    path('recipe-category/', RecipeCategoryView.as_view(), name='recipe-category'),
+    path('ingredient-category/', IngredientCategoryView.as_view(), name='ingredient'),
 ]
