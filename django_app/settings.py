@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-p!o24h*!^ygk9+f0i9#rv)mc+w%q81nm!_^a2ru#t2o++ay^#4'
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['recheffapp.pythonanywhere.com', '*']
 
 AUTH_USER_MODEL = 'account.User'
 
