@@ -11,7 +11,13 @@ urlpatterns = [
     path(r'', include(router.urls)),
     path('favorite/', FavoriteView.as_view(), name='favorite-recipe'),
     path('dashboard/', DashboardView.as_view(), name='dashboard-viewww'),
-    
+
     path('recipe-category/', RecipeCategoryView.as_view(), name='recipe-category'),
-    path('ingredient-category/', IngredientCategoryView.as_view(), name='ingredient'),
+    path('ingredient-category/', IngredientCategoryViewForList.as_view(), name='ingrediesasnt'),
+    path('ingredient-category/<str:name_category>', IngredientCategoryView.as_view(), name='ingredient'),
+    
+    # path('ingredient/', IngredientView.as_view(), name='ingrediensssst'),
+    
+    path('my-info/', MyInfoView.as_view(), name='my-info'),
+    path('my-recipe/', MyRecipeView.as_view(), name='my-recipe'),
 ]

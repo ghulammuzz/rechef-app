@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
 
-from rest_framework import generics, viewsets
+from rest_framework import generics, viewsets, mixins
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 
@@ -29,11 +29,13 @@ class DashboardView(generics.GenericAPIView):
         
         for i in range (len(sorted_recipe)):
             print(sorted_recipe[i].name, self.get_point_populer(sorted_recipe[i]))
-        
+    
         popular = RecipeModelForListSerializer(sorted_recipe[:5], many=True)
+        
         last_seen_data = request.user.last_view.all()
         reverse_last_seen_data = last_seen_data[::-1]
         last_seen = RecipeModelForListSerializer(reverse_last_seen_data[:5]  , many=True)
+        
         return Response({
             "popular": popular.data,
             "last_seen": last_seen.data
@@ -77,11 +79,17 @@ class RecipeViewset(viewsets.ModelViewSet):
         # return self.get_paginated_response(serializer.data)   
         return super().list(request, *args, **kwargs) 
          
+    def destroy(self, request, *args, **kwargs):
+        recipe = self.get_object()
+        if recipe.user != request.user:
+            return Response({"message": "You are not allowed to delete this recipe."}, status=401)
+        return super().destroy(request, *args, **kwargs)
     
     def update(self, request, *args, **kwargs):
         recipe = self.get_object()
         self.parser_classes = (MultiPartParser, FormParser)
         if recipe.user != request.user:
+            print(request.user.username)
             return Response({"message": "You are not allowed to update this recipe."}, status=401)
         return super().update(request, *args, **kwargs)
 
@@ -151,9 +159,51 @@ class RecipeCategoryView(generics.ListAPIView):
     serializer_class = InterestSerializer
     pagination_class = PaginationForRecipeCategoryView
     
-class IngredientCategoryView(generics.ListAPIView):
+class IngredientCategoryView(generics.GenericAPIView):
     permission_classes = ()
     queryset = Category.objects.all()
     serializer_class = CategoryForListSerializer
     
+    def get(self, request, name_category):
+        cat_id = get_object_or_404(Category, name=name_category)
+        ingredient = Core.objects.filter(category_fk=cat_id)
+        serializer = IngredientByCategorySerializer(ingredient, many=True)
+        return Response(serializer.data)
     
+class IngredientCategoryViewForList(generics.ListAPIView, generics.GenericAPIView):
+    permission_classes = ()
+    queryset = Category.objects.all()
+    serializer_class = CategoryForListSerializer
+    
+class MyInfoView(generics.GenericAPIView):
+    permission_classes = ()
+    serializer_class = MyInfoViewSerializer
+    
+    def get(self, request):
+        user = get_object_or_404(User, username=request.user.username)
+        # recipe = Recipe.objects.filter(user=user)
+        serializer = MyInfoViewSerializer(user, many=False)
+        
+        # paginate in RecipeModelForListSerializer
+        # paginate_view = 
+        return Response(serializer.data)
+    
+class MyRecipeView(generics.ListAPIView):
+    permission_classes = ()
+    serializer_class = RecipeModelForListSerializer
+    pagination_class = ApiPagination
+    queryset = Recipe.objects.all()
+    
+    def list(self, request):
+        user = get_object_or_404(User, username=request.user.username)
+    
+        # get 2 popular recipe
+        recipe = Recipe.objects.filter(user=user)
+        page = self.paginate_queryset(recipe)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
+    
+class IngredientView(generics.ListAPIView, generics.RetrieveAPIView):
+    serializer_class = IngredientByCategorySerializer
+    queryset = Core.objects.all()
+    permission_classes = ()

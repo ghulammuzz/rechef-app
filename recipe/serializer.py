@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from .models import *
+from account.models import Follow, Interest, User
+from django.utils import timezone
 
 class MethodModelSerializer(serializers.ModelSerializer):
     
@@ -100,16 +102,21 @@ class RecipeModelSerializer(serializers.ModelSerializer):
     difficulty = serializers.ChoiceField(choices=Recipe.Difficulty.choices, required=True)
     method = MethodModelSerializer(many=True)
     category = CategoryModelSerializer(many=True)
-
+    # interest = serializers.SerializerMethodField(read_only=False)
+    interests = serializers.ListField(required=False)
+    tag = serializers.SerializerMethodField()
     
-    # def get_method(self, obj):
-    #     method = Method.objects.filter(recipe_fk=obj)
-    #     sorted_method = method.order_by('number')
-    #     return MethodModelSerializer(sorted_method, many=True).data
-
+    def get_tag(self, instance):
+        return [item.interest for item in instance.interest.all()]
+    
     def to_representation(self, instance):
         representation = super().to_representation(instance)
+        # manyrelated_manager
+        # interest = representation['interest']
+        # representation['interest'] = interest
+        # Convert the difficulty to string
 
+        
         # Convert the duration to hours and minutes
         duration = representation['duration']
         hours = duration // 60
@@ -130,16 +137,26 @@ class RecipeModelSerializer(serializers.ModelSerializer):
             core['core'] = sorted_core
             
         return representation
-    
+
     def create(self, validated_data):
         
         categories = validated_data.pop('category', [])
         methods = validated_data.pop('method', [])
-            
+        interests = validated_data.pop('interests')
         creator = Recipe.objects.create(
             user = self.context['request'].user,
+            created_at = timezone.now(),
             **validated_data
         )
+        # ecxa
+        # post data recipe with interest
+        
+        list_interest = []
+        for interest in interests:
+            get_interest = get_object_or_404(Interest, interest=interest)
+            list_interest.append(get_interest)
+        creator.interest.set(list_interest)   
+            
         for category in categories:
             name_category = category.pop('name')
             cores = category.get('core')
@@ -214,6 +231,13 @@ class RecipeModelSerializer(serializers.ModelSerializer):
             instance.category.add(get_category)
             instance.save()
         
+        interests = validated_data.pop('interests')
+        list_interest = []
+        for interest in interests:
+            get_interest = get_object_or_404(Interest, interest=interest)
+            list_interest.append(get_interest)
+        instance.interest.set(list_interest)
+        
         instance.method.all().delete()
         for method in methods:
             sub_method = Method.objects.create(recipe_fk=instance, **method)
@@ -223,7 +247,9 @@ class RecipeModelSerializer(serializers.ModelSerializer):
             
     class Meta:
         model = Recipe
-        fields = ["id", "name", "user", "description", "image", "view", "fav", "duration", "portion", "calories", "difficulty", "is_hidden_like", "is_hidden_comment", "method", "category"]
+        fields = ["id", "name", "user", "description", "image", "view", "fav", "duration", "portion", "calories", "difficulty", "is_hidden_like", "is_hidden_comment", "method", "category",
+                  "interests", "tag"
+                  ]
     
 class RecipeModelForListSerializer(serializers.ModelSerializer):
     
@@ -237,9 +263,46 @@ class RecipeModelForListSerializer(serializers.ModelSerializer):
     portion = serializers.IntegerField(required=True)
     calories = serializers.IntegerField(required=True)
     difficulty = serializers.ChoiceField(choices=Recipe.Difficulty.choices, required=True)
+    method = serializers.SerializerMethodField()
+    
+    def get_method(self, instance):
+        # get 2 method and order by number
+        methods = instance.method.all()
+        sorted_method = sorted(methods, key=lambda k: k.number)
+        method_2 = sorted_method[:2]
+        return MethodModelSerializer(method_2, many=True).data
+    
+    def get_ingredient(self, instance):
+        # get 2 ingredient
+        ingredients = instance.ingredient.all()[:2]
+        return IngredientCoreModelSerializer(ingredients, many=True).data 
 
             
     class Meta:
         model = Recipe
-        fields = ["id", "name", "user", "description", "image", "view", "fav", "duration", "portion", "calories", "difficulty", "is_hidden_like", "is_hidden_comment"]
+        fields = ["id", "name", "user", "description", "image", "view", "fav", "duration", "portion", "calories", "difficulty", "is_hidden_like", "is_hidden_comment", "method",]
+
+class MyInfoViewSerializer(serializers.ModelSerializer):
     
+    image = serializers.ImageField(required=False)
+    following = serializers.SerializerMethodField()
+    follower = serializers.SerializerMethodField()
+
+    
+    def get_following(self, instance):
+        data_following = Follow.objects.filter(following=instance).count()
+        return data_following
+    
+    def get_follower(self, instance):
+        data_follower = Follow.objects.filter(follower=instance).count()
+        return data_follower
+    
+    class Meta:
+        model = User
+        fields = ['username', 'image', 'bio', 'following', 'follower',]
+        
+class IngredientByCategorySerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
+    class Meta:
+        model = Core
+        fields = ["id", "name"]

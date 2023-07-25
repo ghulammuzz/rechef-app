@@ -69,13 +69,39 @@ class UpdateUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(min_length=8, write_only=True)
     email = serializers.EmailField(required=False)
     image = serializers.ImageField(required=False)
+    interests = serializers.ListField(required=False)
+
     
     def update(self, instance, validated_data):
+        interests = validated_data.pop('interests', [])
+        list_interest = []
+        for interest in interests:
+            get_interest = get_object_or_404(Interest, interest=interest)
+            list_interest.append(get_interest)
+        instance.interest.set(list_interest)
+        
         return super().update(instance, validated_data)
 
     class Meta:
         model = User
-        fields = ["username", "bio", "email", "image", "password"]
+        fields = ["username", "bio", "email", "image", "password", 'interests']
+
+class UpdateUserForGetSerializer(serializers.ModelSerializer):
+
+    password = serializers.CharField(min_length=8, write_only=True)
+    email = serializers.EmailField(required=False)
+    image = serializers.ImageField(required=False)
+    interests = serializers.SerializerMethodField()
+    
+    def get_interests(self, instance):
+        list_interest = []
+        for i in instance.interest.all():
+            list_interest.append(i.interest)
+        return list_interest
+    
+    class Meta:
+        model = User
+        fields = ["username", "bio", "email", "image", "password", 'interests']
         
 class InterestSerializer(serializers.ModelSerializer):
     class Meta:

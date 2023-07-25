@@ -35,14 +35,14 @@ class UserLoginView(APIView):
 class UpdateUserView(generics.UpdateAPIView, generics.GenericAPIView):
     serializer_class = UpdateUserSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
+    # parser_classes = [MultiPartParser, FormParser]
     
     def get_object(self):
         return self.request.user
     
     def get(self, request, *args, **kwargs):
         user = self.get_object()
-        serializer = self.get_serializer(user)
+        serializer = UpdateUserForGetSerializer(user)
         return Response(serializer.data)
     
     def put(self, request, *args, **kwargs):

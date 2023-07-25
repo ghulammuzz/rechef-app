@@ -24,6 +24,9 @@ class Recipe(models.Model):
     portion = models.IntegerField(default=0)
     calories = models.IntegerField(default=0)
     
+    #
+    interest = models.ManyToManyField('account.Interest', blank=True)
+    
     # difficulty
     class Difficulty(models.TextChoices):
         Pemula = 'Pemula'

@@ -83,3 +83,12 @@ class Interest(models.Model):
     
     def __str__(self):
         return self.interest
+    
+
+class Follow(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='follower') # mengikuti
+    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following') # diikuti
+    
+    def __str__(self):
+        return f"{self.follower} follow {self.following}"

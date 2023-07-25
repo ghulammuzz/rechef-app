@@ -10,7 +10,7 @@ class RecipeAdmin(admin.ModelAdmin):
 admin.site.register(Recipe,  RecipeAdmin)
 
 class MethodAdmin(admin.ModelAdmin):
-    list_display = ('id', 'method_text')
+    list_display = ('id','number', 'method_text')
     list_display_links = ('id', 'method_text')
     search_fields = ('method_text',)
     list_per_page = 25
