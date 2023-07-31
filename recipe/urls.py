@@ -13,6 +13,8 @@ urlpatterns = [
     path('dashboard/', DashboardView.as_view(), name='dashboard-viewww'),
 
     path('recipe-category/', RecipeCategoryView.as_view(), name='recipe-category'),
+    path('recipe-category/<str:name_category>', RecipeCategoryRetrieveView.as_view(), name='retrieve-recipe-category'),
+    
     path('ingredient-category/', IngredientCategoryViewForList.as_view(), name='ingrediesasnt'),
     path('ingredient-category/<str:name_category>', IngredientCategoryView.as_view(), name='ingredient'),
     

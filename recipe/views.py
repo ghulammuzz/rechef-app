@@ -158,6 +158,18 @@ class RecipeCategoryView(generics.ListAPIView):
     queryset = Interest.objects.all()
     serializer_class = InterestSerializer
     pagination_class = PaginationForRecipeCategoryView
+
+class RecipeCategoryRetrieveView(generics.GenericAPIView):
+    permission_classes = ()
+    queryset = Interest.objects.all()
+    serializer_class = InterestSerializer
+    pagination_class = PaginationForRecipeCategoryView
+    
+    def get(self, request, name_category):
+        cat_id = get_object_or_404(Interest, interest=name_category)
+        recipe = Recipe.objects.filter(interest=cat_id)
+        serializer = RecipeModelForListSerializer(recipe, many=True)
+        return Response(serializer.data)
     
 class IngredientCategoryView(generics.GenericAPIView):
     permission_classes = ()
